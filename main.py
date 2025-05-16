@@ -61,15 +61,35 @@ async def save_photo(message: Message):
     await bot.download(message.photo[-1], destination=f'img/{file_id}.jpg')
     await message.answer("Фото сохранено!")
 
+
 # Команда /video
 @dp.message(Command("video"))
 async def video(message: Message):
-    await bot.send_chat_action(message.chat.id, "upload_video")
-    video = FSInputFile("video.mp4")
-    await bot.send_video(message.chat.id, video)
+    import os
+    from aiogram.types import FSInputFile
+
+    # Абсолютный путь
+    path = os.path.abspath("video.mp4")
+
+    # Логирование в консоль
+    print(f"[DEBUG] Текущая рабочая директория: {os.getcwd()}")
+    print(f"[DEBUG] Абсолютный путь к видео: {path}")
+    print(f"[DEBUG] Файл существует? {os.path.exists(path)}")
+
+    if not os.path.exists(path):
+        await message.answer("❌ Файл video.mp4 не найден.")
+        return
+
+    try:
+        await bot.send_chat_action(message.chat.id, "upload_video")
+        video = FSInputFile(path)
+        await bot.send_video(message.chat.id, video)
+    except Exception as e:
+        print(f"[ERROR] Ошибка при отправке видео: {e}")
+        await message.answer(f"⚠️ Ошибка при отправке видео: {e}")
+
 
 # Команда /audio
-@dp.message(Command("audio"))
 async def audio(message: Message):
     await bot.send_chat_action(message.chat.id, "upload_audio")
     audio = FSInputFile("sound2.mp3")
